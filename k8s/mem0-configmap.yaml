@@ -1,0 +1,31 @@
+# ConfigMap for mem0 MCP server configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mem0-config
+  namespace: memory-palace
+  labels:
+    app.kubernetes.io/name: mem0-mcp
+    app.kubernetes.io/part-of: memory-palace
+data:
+  # mem0 config.yaml — ChromaDB as vector store, Ollama for local embeddings
+  config.yaml: |
+    version: "1.0"
+    vector_store:
+      provider: chroma
+      config:
+        collection_name: "memory_palace"
+        host: "chromadb.memory-palace.svc.cluster.local"
+        port: 8000
+    embedder:
+      provider: ollama
+      config:
+        model: nomic-embed-text
+        ollama_base_url: "http://ollama.default.svc.cluster.local:11434"
+    llm:
+      provider: ollama
+      config:
+        model: llama3.1
+        ollama_base_url: "http://ollama.default.svc.cluster.local:11434"
+        temperature: 0.1
+        max_tokens: 2000

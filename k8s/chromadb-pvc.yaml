@@ -1,0 +1,16 @@
+# Persistent Volume Claim for ChromaDB data
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: chromadb-data
+  namespace: memory-palace
+  labels:
+    app.kubernetes.io/name: chromadb
+    app.kubernetes.io/part-of: memory-palace
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  # storageClassName: standard  # Uncomment and set to your storage class

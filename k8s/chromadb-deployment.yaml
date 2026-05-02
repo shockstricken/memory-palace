@@ -1,0 +1,81 @@
+# ChromaDB - Vector Database
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chromadb
+  namespace: memory-palace
+  labels:
+    app.kubernetes.io/name: chromadb
+    app.kubernetes.io/part-of: memory-palace
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate  # Important: single writer for ChromaDB
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: chromadb
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: chromadb
+        app.kubernetes.io/part-of: memory-palace
+    spec:
+      containers:
+        - name: chromadb
+          image: chromadb/chroma:latest
+          ports:
+            - containerPort: 8000
+              name: http
+              protocol: TCP
+          env:
+            - name: IS_PERSISTENT
+              value: "TRUE"
+            - name: ANONYMIZED_TELEMETRY
+              value: "FALSE"
+            - name: ALLOW_RESET
+              value: "FALSE"
+          volumeMounts:
+            - name: chromadb-data
+              mountPath: /chroma/chroma
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+          readinessProbe:
+            httpGet:
+              path: /api/v2/heartbeat
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/v2/heartbeat
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 30
+      volumes:
+        - name: chromadb-data
+          persistentVolumeClaim:
+            claimName: chromadb-data
+---
+# ChromaDB Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: chromadb
+  namespace: memory-palace
+  labels:
+    app.kubernetes.io/name: chromadb
+    app.kubernetes.io/part-of: memory-palace
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: chromadb
+  ports:
+    - name: http
+      port: 8000
+      targetPort: http
+      protocol: TCP

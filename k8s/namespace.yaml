@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: memory-palace
+  labels:
+    app.kubernetes.io/name: memory-palace
+    app.kubernetes.io/part-of: memory-palace
