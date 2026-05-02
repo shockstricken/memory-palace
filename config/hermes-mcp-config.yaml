@@ -1,0 +1,22 @@
+# Hermes Agent MCP Configuration
+# Add this to your Hermes config.yaml under mcp_servers
+
+# ─── Option A: Using the official mem0/openmemory-mcp image ───
+mcp_servers:
+  memory-palace:
+    url: "http://mem0-mcp.memory-palace.svc.cluster.local:8765/sse"
+    # If auth is enabled:
+    # headers:
+    #   Authorization: "Bearer your-api-key"
+
+# ─── Option B: Using the custom lightweight MCP server ───
+# mcp_servers:
+#   memory-palace:
+#     url: "http://memory-palace-mcp.memory-palace.svc.cluster.local:8765/sse"
+#     headers:
+#       Authorization: "Bearer your-api-key"
+
+# ─── Option C: Local Docker Compose (testing) ───
+# mcp_servers:
+#   memory-palace:
+#     url: "http://localhost:8765/sse"
