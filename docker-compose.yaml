@@ -1,0 +1,42 @@
+# Docker Compose for local development / testing
+# For production, use the K8s manifests in k8s/
+services:
+  # ─── ChromaDB Vector Store ───
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: memory-palace-chromadb
+    ports:
+      - "8000:8000"
+    environment:
+      IS_PERSISTENT: "TRUE"
+      ANONYMIZED_TELEMETRY: "FALSE"
+    volumes:
+      - chromadb-data:/chroma/chroma
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v2/heartbeat"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ─── mem0 MCP Server ───
+  mem0-mcp:
+    image: mem0/openmemory-mcp:latest
+    container_name: memory-palace-mcp
+    ports:
+      - "8765:8765"
+    environment:
+      VECTOR_STORE: "chroma"
+      CHROMA_HOST: "chromadb"
+      CHROMA_PORT: "8000"
+      AUTH_DISABLED: "true"
+      # Uncomment for OpenAI embeddings:
+      # OPENAI_API_KEY: "${OPENAI_API_KEY}"
+    depends_on:
+      chromadb:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  chromadb-data:
+    driver: local
